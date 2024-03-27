@@ -1,6 +1,6 @@
 const userTab= document.querySelector("[data-userWeather]");
 const searchTab= document.querySelector("[data-searchWeather]");
-const grantAccessContainer=document.querySelector("[grant-location-container]");
+const grantAccessContainer=document.querySelector(".grant-location-container");
 const loadingScreen=document.querySelector(".loading-container");
 const userInfoContainer = document.querySelector(".user-info-container");
 const searchForm = document.querySelector("[data-searchForm]");
@@ -48,13 +48,13 @@ function getfromSessionStorage(){
     if(!localCoordinates){
         grantAccessContainer.classList.add("active");
     }else{
-        const cordinates = json.parse(localCoordinates);
-        fetchUserWeatherInfo(cordinates);
+        const coordinates = JSON.parse(localCoordinates);
+        fetchUserWeatherInfo(coordinates);
     }
 }
 
-async function fetchUserWeatherInfo(cordinates){
-    const {lat ,lon} =cordinates;
+async function fetchUserWeatherInfo(coordinates){
+    const {lat ,lon} =coordinates;
     grantAccessContainer.classList.remove("active");
     loadingScreen.classList.add("active");
 
@@ -75,6 +75,7 @@ async function fetchUserWeatherInfo(cordinates){
 }
 
 function renderWeatherInfo(weatherInfo){
+    
     const cityName = document.querySelector("[data-cityName]");
     const countryIcon = document.querySelector("[data-countryIcon]");
     const desc = document.querySelector("[data-weatherDesc]");
@@ -93,6 +94,33 @@ function renderWeatherInfo(weatherInfo){
     humidity.innerText=weatherInfo?.main?.humidity;
     cloudiness.innerText=weatherInfo?.cloud?.all;
 }
+function getLocation() {
+    if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    }
+    else {
+        //HW - show an alert for no gelolocation support available
+        alert("No geoLocation access available");
+    }
+}
+
+function showPosition(position) {
+
+    const userCoordinates = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+    }
+
+    sessionStorage.setItem("user-coordinates", JSON.stringify(userCoordinates));
+    fetchUserWeatherInfo(userCoordinates);
+
+}
+
+const grantAccessButton = document.querySelector("[data-grantAccess]");
+grantAccessButton.addEventListener("click", getLocation);
+
+const searchInput = document.querySelector("[data-searchInput]");
+
 searchForm.addEventListener("submit", (e) => {
     e.preventDefault();
     let cityName = searchInput.value;
@@ -102,6 +130,8 @@ searchForm.addEventListener("submit", (e) => {
     else 
         fetchSearchWeatherInfo(cityName);
 })
+const notFound=document.querySelector(".not-found");
+ 
 async function fetchSearchWeatherInfo(city) {
     loadingScreen.classList.add("active");
     userInfoContainer.classList.remove("active");
@@ -118,5 +148,10 @@ async function fetchSearchWeatherInfo(city) {
     }
     catch(err) {
         //hW
+        alert("afdaff");
+        userInfoContainer.classList.remove("active");
+        loadingScreen.classList.remove("active");
+        
+         notFound.classList.add("dikhao");
     }
 }
